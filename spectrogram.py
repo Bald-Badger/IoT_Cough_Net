@@ -5,6 +5,8 @@ from scipy.fft import fftshift
 from scipy.io import wavfile
 from scipy.signal import windows as wnd
 
+import CoughDataset as CD
+
 
 def get_audio_arr(filename:str="./audio/jp.wav"):
     print("opening file: ", filename)
@@ -45,7 +47,7 @@ def spectrogram(audio_arr, fs, show=False, offset = 1e-7):
         plt.ylabel('Frequency [Hz]')
         plt.xlabel('Time [sec]')
         plt.savefig('temp.png')
-    return f, t, Sxx.T
+    return f, t, Sxx.T, fps
 
 
 def linear_scale(arr, max=10):
@@ -61,5 +63,10 @@ if __name__ == "__main__":
     fs, audio_arr = get_audio_arr("./audio/mix.wav")
     print ("audio sampling freq: ", fs)
     print ("audio length in sample: ", audio_arr.shape[0])
-    f, t, gram = spectrogram(audio_arr, fs, show=False)
+    f, t, gram, fps = spectrogram(audio_arr, fs, show=False)
+    
+    cd = CD.CoughDataset(f, t, gram, fps)
+    len = cd.__len__()
+    for i in range (len):
+        print(cd.__getitem__(i)['label'])
 
