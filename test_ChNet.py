@@ -6,8 +6,8 @@ from torch.utils.data import DataLoader
 
 
 if __name__ == "__main__":
-    net = CN.CoughNet()
-    net.load_state_dict(torch.load("./temp.mod"))
+    net = CN.CoughNet_Micro()
+    net.load_state_dict(torch.load("./ChNet_Micro.mod"))
     fs, audio_arr = sp.get_audio_arr("./audio/mix.wav")
     print ("audio sampling freq: ", fs)
     print ("audio length in sample: ", audio_arr.shape[0])
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     for i, data in enumerate(dataloader, 0):
         inputs, labels = data[0], data[1]
         predict = net(inputs)
-        if (i > 1000):
+        if (i > 10000):
             break
         for j in range (4):
             if round(predict[j].item()) != round(labels[j].item()):

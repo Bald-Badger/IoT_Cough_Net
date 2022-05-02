@@ -74,7 +74,7 @@ if __name__ == "__main__":
     cd = CD.CoughDataset(f, t, gram, fps)
     dataloader = DataLoader(dataset=cd, batch_size=4, shuffle=True)
     
-    cn = CN.CoughNet_Lite()
+    cn = CN.CoughNet_Micro()
     criterion = nn.BCELoss()
     optimizer = optim.SGD(cn.parameters(), lr=0.001, momentum=0.9)
     
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         print("traning on CPU")
     
 
-    for epoch in range(20):  # loop over the dataset multiple times
+    for epoch in range(10):  # loop over the dataset multiple times
         running_loss = 0.0
         for i, data in enumerate(dataloader, 0):
             # get the inputs; data is a list of [inputs, labels]
@@ -120,5 +120,8 @@ if __name__ == "__main__":
             torch.save(cn.state_dict(), "./temp.mod") # saving model
 
     print('Finished Training')
-    torch.save(cn.state_dict(), "cn_lite.mod")
-    
+    if (useGPU):
+        torch.save(cn.cpu().state_dict(), "./cn_micro.mod") # saving model
+        cn.to(device) # moving model to GPU for further training
+    else:
+        torch.save(cn.state_dict(), "./cn_micro.mod") # saving model

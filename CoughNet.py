@@ -73,4 +73,62 @@ class CoughNet_Lite(nn.Module):
         x = torch.softmax(x, dim=0)
         return x
  
+
+
+class CoughNet_Micro(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 4, kernel_size=11, stride=4)
+        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv2 = nn.Conv2d(4, 8, kernel_size=5,padding=2)
+        self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(8, 16, kernel_size=3, padding=1)
+        self.pool3 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.fc1 = nn.Linear(480, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 16)
+        self.fc4 = nn.Linear(16, 1)
+
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.pool2(x)
+        x = self.conv3(x)
+        x = self.pool3(x)
+        x = torch.flatten(x, 1) # flatten all dimensions except batch
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
+        x = torch.flatten(x)
+        x = torch.softmax(x, dim=0)
+        return x
+    
+
+class CoughNet_Nano(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 4, kernel_size=17, stride=6)
+        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv2 = nn.Conv2d(4, 8, kernel_size=11,padding=4)
+        self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.fc1 = nn.Linear(480, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(16, 1)
+
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.pool2(x)
+        x = torch.flatten(x, 1) # flatten all dimensions except batch
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        x = torch.flatten(x)
+        x = torch.softmax(x, dim=0)
+        return x
  
