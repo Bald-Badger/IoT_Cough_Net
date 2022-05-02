@@ -18,11 +18,12 @@ class CoughDataset(Dataset):
             end_time = t[i+self.window_len]
             positive = self.enclose(start_time, end_time)
             self.ds.append({'data':gram[i:i+self.window_len], 'label':positive})
-            
-    
+        print("data set shape: ", self.ds[0]['data'].shape)
+
+
     def __len__(self):
         return len(self.ds)
-    
+
     
     def __getitem__(self, index):
         d = self.ds[index]['data']
