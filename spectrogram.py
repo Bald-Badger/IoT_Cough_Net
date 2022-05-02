@@ -5,7 +5,15 @@ from scipy.fft import fftshift
 from scipy.io import wavfile
 from scipy.signal import windows as wnd
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import DataLoader
+import torch.optim as optim
+
 import CoughDataset as CD
+
+import CoughNet as CN
 
 
 def get_audio_arr(filename:str="./audio/jp.wav"):
@@ -34,7 +42,7 @@ def spectrogram(audio_arr, fs, show=False, offset = 1e-7):
     # print (type(f[0]),type(t[0]),type(Sxx[0][0]))
     (row, col) = Sxx.shape
     print ("desc freq num: ", row, ", time frames: ", col)
-    fps = round(col * fs / len(audio_arr))
+    fps = col * fs / len(audio_arr)
     print ("frame per second: ", fps)
     
     # give all the data a slight offset
@@ -66,7 +74,37 @@ if __name__ == "__main__":
     f, t, gram, fps = spectrogram(audio_arr, fs, show=False)
     
     cd = CD.CoughDataset(f, t, gram, fps)
-    len = cd.__len__()
-    for i in range (len):
-        print(cd.__getitem__(i)['label'])
+    dataloader = DataLoader(dataset=cd, batch_size=4, shuffle=True)
+    
+    cn = CN.CoughNet()
+    criterion = nn.BCELoss()
+    optimizer = optim.SGD(cn.parameters(), lr=0.001, momentum=0.9)
+    
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    print(device)
+    
+    cn.to(device)
+    
 
+    for epoch in range(20):  # loop over the dataset multiple times
+        running_loss = 0.0
+        for i, data in enumerate(dataloader, 0):
+            # get the inputs; data is a list of [inputs, labels]
+            inputs, labels = data[0].to(device), data[1].to(device)
+
+            # zero the parameter gradients
+            optimizer.zero_grad()
+
+            # forward + backward + optimize
+            outputs = cn(inputs)
+            loss = criterion(outputs, labels.float())
+            loss.backward()
+            optimizer.step()
+
+            # print statistics
+            running_loss += loss.item()
+            if i % 2000 == 1999:    # print every 2000 mini-batches
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
+                running_loss = 0.0
+
+    print('Finished Training')

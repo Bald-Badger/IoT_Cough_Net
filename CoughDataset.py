@@ -1,4 +1,6 @@
-from torch.utils.data import Dataset, DataLoader
+from torch import double
+from torch.utils.data import Dataset
+import numpy as np
 
 
 class CoughDataset(Dataset):
@@ -7,10 +9,10 @@ class CoughDataset(Dataset):
     
 
     def __init__(self, f=[], t=[], gram=[], fps=0):
+        self.fps = fps
         self.window_len = round(fps * self.section_len)
         self.nframe = len(t)
         self.ds = []
-        print(t[0:100])
         for i in range (self.nframe - self.window_len):
             start_time = t[i]
             end_time = t[i+self.window_len]
@@ -23,7 +25,11 @@ class CoughDataset(Dataset):
     
     
     def __getitem__(self, index):
-        return self.ds[index]
+        d = self.ds[index]['data']
+        l = 0
+        if self.ds[index]['label'] == True:
+            l = 1
+        return (d[None, :], l) # add a outmost dummy dimention
     
 
     def enclose(self, head=0.0, tail=0.0):
@@ -33,4 +39,5 @@ class CoughDataset(Dataset):
                 result = True
                 break
         return result
+
 
