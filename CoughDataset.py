@@ -18,7 +18,7 @@ class CoughDataset(Dataset):
             end_time = t[i+self.window_len]
             positive = self.enclose(start_time, end_time)
             self.ds.append({'data':gram[i:i+self.window_len], 'label':positive})
-        print("data set shape: ", self.ds[0]['data'].shape)
+        # print("data set shape: ", self.ds[0]['data'].shape)
 
 
     def __len__(self):
@@ -30,6 +30,10 @@ class CoughDataset(Dataset):
         l = 0
         if self.ds[index]['label'] == True:
             l = 1
+        target_row_cnt = 240
+        dif = target_row_cnt - d.shape[0]
+        for i in range(dif):
+            d = np.r_[d, [d[0]]]
         return (d[None, :], l) # add a outmost dummy dimention
     
 

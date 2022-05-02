@@ -1,5 +1,6 @@
 import pyaudio
 import wave
+import numpy as np
 
 
 def list_device():
@@ -13,8 +14,8 @@ def record_audio(time:float=1, name:str="temp.wav"):
     # audio setting
     form_1 = pyaudio.paInt16 # 16-bit resolution
     chans = 1 # 1 channel
-    samp_rate = 44100 # 44.1kHz sampling rate
-    chunk = 4096 # 2^12 samples for buffer
+    samp_rate = 48000 # 44.1kHz sampling rate
+    chunk = 4800 # 2^12 samples for buffer
     record_secs = time # seconds to record
     dev_index = 1 # device index found by p.get_device_info_by_index(ii)
     wav_output_filename = name # name of .wav file
@@ -47,10 +48,7 @@ def record_audio(time:float=1, name:str="temp.wav"):
     wavefile.close()
 
 
-def get_audio_arr_old(filename:str="./audio/jp.wav"):
-    ifile = wave.open(filename)
-    samples = ifile.getnframes()
-    audio = ifile.readframes(samples)
-    audio_as_np_int16 = np.frombuffer(audio, dtype=np.int16)
-    return audio_as_np_int16
+if __name__ == "__main__":
+    while (True):
+        record_audio(0.6, name="cur.wav")
 
